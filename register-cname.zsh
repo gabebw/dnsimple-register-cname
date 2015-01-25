@@ -3,10 +3,20 @@
 # Find your DNSimple token at https://dnsimple.com/user.
 # Run this script as:
 #
-# DNSIMPLE_EMAIL=me@example.com DNSIMPLE_TOKEN=abc123 DOMAIN=you.com ./register-cname.zsh
+# DNSIMPLE_TOKEN=abc123 DOMAIN=you.com ./register-cname.zsh
+
+if [[ -z "$DNSIMPLE_TOKEN" ]]; then
+  echo "Set \$DNSIMPLE_TOKEN to your DNSimple domain token."
+  exit 64
+fi
+
+if [[ -z "$DOMAIN" ]]; then
+  echo "Set \$DOMAIN to the name of your DNSimple domain."
+  exit 64
+fi
 
 dnsimple_curl(){
-  curl -s -H "X-DNSimple-Token: $DNSIMPLE_EMAIL:$DNSIMPLE_TOKEN" \
+  curl -s -H "X-DNSimple-Domain-Token: $DNSIMPLE_TOKEN" \
     -H 'Accept: application/json' \
     -H 'Content-Type: application/json' \
     "$@" | jq .
@@ -18,6 +28,11 @@ get_all_records(){
 }
 
 register_cname(){
+  if (( $# < 2 )); then
+    echo "register_cname needs a subdomain and a URL to map to"
+    exit 64
+  fi
+
   subdomain="$1"
   url="$2"
 
@@ -36,5 +51,7 @@ EOJSON
     -d "$json"
 }
 
+# get_all_records
+
 # hello.yourdomain.com -> tumblr.com
-register_cname "hello" "tumblr.com"
+# register_cname "hello" "tumblr.com"
